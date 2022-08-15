@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     mkdir("Assignment", 0700);
 
     // creating the destination file
-    char destination[100] = "Assignment/1_";
+    char destination[100] = "Assignment/2_";
     strcat(destination, argv[1]);
 
     long long dest_file = open(destination, O_CREAT | O_RDWR | O_TRUNC, 0600);
