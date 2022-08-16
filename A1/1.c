@@ -112,8 +112,9 @@ int main(int argc, char *argv[])
         // TODO: make a functioning progressbar
         ssize_t read_size = read(source_file, c, len_to_move);
         total_progress += read_size;
-        printf(buffer, "\r progress = %.2f%%", (float)(total_progress * 100) / fileLength);
-
+        sprintf(buffer, "\r progress = %.2f%%", (100.0f * total_progress) / fileLength);
+        write(STDOUT_FILENO, buffer, strlen(buffer));
+        fflush(stdout);
 
         // printf("%s\n", c);
         // reversing the chunk of bytes
