@@ -13,7 +13,7 @@ WRITE syscall: ssize_t write(long long fd, const void *buf, size_t count);
 /*
 --------------------QUESTION--------------------
 
-Reverse the file except the part that that is specified at the start of the execution of the code as the start and the end index of the character not to be reversed.
+Reverse the file Using system calls
 
 --------------------QUESTION--------------------
 */
