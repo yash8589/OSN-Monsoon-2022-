@@ -1,5 +1,7 @@
 #include "prompt.h"
 #include "headers.h"
+#include "parse.h"
+#include "input.h"
 #include <string.h>
 #include <unistd.h>
 
