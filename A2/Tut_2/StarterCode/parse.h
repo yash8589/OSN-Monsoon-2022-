@@ -2,6 +2,6 @@
 #define __PARSE_H
 
 char *removeSpacesFromStr(char *string);
-void parse(char *input);
+long long parse(char *input, long long argc, char *argv[1000]);
 
 #endif

@@ -28,7 +28,7 @@ char *removeSpacesFromStr(char *string)
 }
 
 // parse the code and return the number of commands
-void parse(char *input)
+long long parse(char *input, long long argc, char *argv[1000])
 {
     char command_list[MAX_COMMANDS][1000];
     // remove spaces from the input
@@ -48,8 +48,12 @@ void parse(char *input)
     char *command = strtok(input_no_spaces, ";\n");
     while (command != NULL)
     {
-        printf("%s\n", command);
+        // printf("%s\n", command);
+        argv[argc] = command;
+        argc++;
 
         command = strtok(NULL, ";\n");
     }
+
+    return argc;
 }
