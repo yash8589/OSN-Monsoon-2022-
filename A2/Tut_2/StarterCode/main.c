@@ -10,7 +10,6 @@
 // get_input() takes input from the user
 
 // TODO: '&' operator run the command preceding it in the background after printing the process id of the newly created process.
-// TODO: Specification 2: Builtin commands [20 marks] --> [cd - 10 marks] --> cd -
 
 int main()
 {
@@ -68,6 +67,10 @@ int main()
                     {
                         chdir(prev_dir);
                     }
+                    else if (strcmp(sep_commands[j + 1], "~") == 0)
+                    {
+                        chdir(old_dir);
+                    }
                     else if (chdir(sep_commands[j + 1]) != 0)
                     {
                         perror("Error: No such directory");
@@ -77,9 +80,9 @@ int main()
 
                     strcpy(prev_dir, current_dir);
                     prev_dir[len_cur_dir] = '\0';
-                    printf("%s\n", current_dir);
-                    printf("%s\n", prev_dir);
-                    printf("%ld\n", strlen(sep_commands[j + 1]));
+                    // printf("%s\n", current_dir);
+                    // printf("%s\n", prev_dir);
+                    // printf("%ld\n", strlen(sep_commands[j + 1]));
                 }
                 else
                 {
