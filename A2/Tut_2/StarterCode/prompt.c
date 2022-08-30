@@ -63,12 +63,3 @@ void prompt()
     // print the prompt
     printf("%s@%s:~%s$ ", name_user, name_host, w_dir + strlen(old_dir));
 }
-
-// void main()
-// {
-//     // init_shell();
-//     // prompt();
-//     // pwd();
-//     // whoami();
-//     // hostname();
-// }
