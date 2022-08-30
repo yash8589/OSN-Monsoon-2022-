@@ -34,7 +34,7 @@ void hostname(char name_host[])
     strcpy(name_host, host);
 }
 
-void init_shell()
+char *init_shell()
 {
     // directory from where the program is running
     pwd(old_dir);
@@ -45,6 +45,7 @@ void init_shell()
         printf("\e[1;1H\e[2J");
     }
     to_clear = 0;
+    return old_dir;
 }
 
 void prompt()
@@ -61,5 +62,8 @@ void prompt()
     // name of the system
     hostname(name_host);
     // print the prompt
-    printf("%s@%s:~%s$ ", name_user, name_host, w_dir + strlen(old_dir));
+    if (strlen(w_dir) >= strlen(old_dir))
+        printf("%s@%s:~%s$ ", name_user, name_host, w_dir + strlen(old_dir));
+    else
+        printf("%s@%s:~%s$ ", name_user, name_host, w_dir);
 }
