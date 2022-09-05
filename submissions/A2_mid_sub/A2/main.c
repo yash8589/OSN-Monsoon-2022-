@@ -2,7 +2,6 @@
 #include "headers.h"
 #include "parse.h"
 #include "input.h"
-#include "commands.h"
 #include <string.h>
 #include <unistd.h>
 
@@ -52,7 +51,7 @@ int main()
                 j++;
                 // printf("%s\n", command);
 
-                command = strtok(NULL, " ");
+                command = strtok(NULL, ";\n");
             }
             max_args = j;
             j = 0;
@@ -106,65 +105,6 @@ int main()
                 else
                 {
                     perror("Error: No string specified");
-                }
-            }
-            // implement ls, ls -l, ls -a without using execvp
-
-            // TODO:  ls <filename>
-            else if (strcmp(sep_commands[j], "ls") == 0)
-            {
-                int flag_a = 0;
-                int flag_l = 0;
-                int num_file_names = 0; // number of file names
-                char *filenames[1000];
-
-                if (max_args == 1)
-                {
-                    _ls(".", 0, 0);
-                }
-                else
-                {
-                    while (j + 1 < max_args)
-                    {
-
-                        if (strcmp(sep_commands[j + 1], "-a") == 0)
-                        {
-                            flag_a = 1;
-                        }
-                        else if (strcmp(sep_commands[j + 1], "-l") == 0)
-                        {
-                            flag_l = 1;
-                        }
-                        else if (strcmp(sep_commands[j + 1], "-al") == 0 || strcmp(sep_commands[j + 1], "-la") == 0)
-                        {
-                            flag_a = 1;
-                            flag_l = 1;
-                        }
-                        else
-                        {
-                            filenames[num_file_names] = sep_commands[j + 1];
-                            num_file_names++;
-                        }
-                        j++;
-                    }
-                    if (num_file_names > 0)
-                    {
-                        for (int i = 0; i < num_file_names; i++)
-                        {
-                            if (strcmp(filenames[i], "~") == 0)
-                            {
-                                _ls(old_dir, flag_a, flag_l);
-                            }
-                            else
-                            {
-                                _ls(filenames[i], flag_a, flag_l);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _ls(".", flag_a, flag_l);
-                    }
                 }
             }
             else
