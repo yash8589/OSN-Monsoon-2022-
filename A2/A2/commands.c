@@ -74,11 +74,12 @@ void _ls(const char *dir, int op_a, int op_l)
         {
             struct stat fileStat;
             char *file_name = list_dir[i];
-            if (stat(file_name, &fileStat) < 0)
-            {
-                perror("Error: Unable to get file stats");
-                return;
-            }
+            stat(file_name, &fileStat);
+            // if (stat(file_name, &fileStat) < 0)
+            // {
+            //     perror("Error: Unable to get file stats");
+            //     return;
+            // }
             if ((S_ISDIR(fileStat.st_mode)))
             {
                 printBlue();
@@ -211,13 +212,27 @@ void _pinfo(char *pid, char *old_dir)
     {
         char *token = strtok(line2, " ");
         int i = 0;
+        char temp[1000];
         while (token != NULL)
         {
             if (i == 2)
             {
-                printf("Process Status : %s \n", token);
-                break;
+                printf("Process Status : %s", token);
+                // break;
             }
+            if (i == 4)
+            {
+                strcpy(temp, token);
+            }
+            if (i == 7)
+            {
+                if(strcmp(temp, token) == 0)
+                {
+                    printf("+\n");
+                    break;
+                }
+            }
+            
             token = strtok(NULL, " ");
             i++;
         }
@@ -242,44 +257,6 @@ void _pinfo(char *pid, char *old_dir)
             i++;
         }
     }
-    // // get console process id of the process with pid
-    // char *console_file = (char *)malloc(100 * sizeof(char));
-    // sprintf(console_file, "/proc/%s/stat", pgid);
-    // FILE *fp3 = fopen(console_file, "r");
-    // if (fp3 == NULL)
-    // {
-    //     perror("Error: Unable to open stat file");
-    //     return;
-    // }
-    // char *line3 = NULL;
-    // size_t len3 = 0;
-    // ssize_t read3;
-    // while ((read3 = getline(&line3, &len3, fp3)) != -1)
-    // {
-    //     char *token = strtok(line3, " ");
-    //     int i = 0;
-    //     while (token != NULL)
-    //     {
-    //         if (i == 6)
-    //         {
-    //             printf("Process Group ID : %s \n", token);
-    //             break;
-    //         }
-    //         token = strtok(NULL, " ");
-    //         i++;
-    //     }
-    // }
-
-    // compare the console pid with the process group id
-    // if they are same then the process is running in foreground
-    // else it is running in background
-
-    // pid_t console_pid = tcgetpgrp(STDOUT_FILENO);
-    // pid_t my_pid = getpgrp();
-    // if (console_pid == my_pid)
-    //     printf("process foregrounded\n");
-    // else
-    //     printf("process backgrounded\n");
     fclose(fp2);
 
     fclose(fp);
@@ -297,7 +274,7 @@ void _pinfo(char *pid, char *old_dir)
     len = 0;
     read = getline(&line, &len, fp);
     char *memory = strtok(line, " ");
-    printf("memory : %s\n", memory);
+    printf("memory : %s  {virtual memory}\n", memory);
     fclose(fp);
 
     // print executable path
@@ -347,12 +324,12 @@ void _discover(char *dir, char *name, char *old_dir, int op_d, int op_f)
             if (strstr(d->d_name, name) == NULL)
                 continue;
         }
-        // if both op_f and op_d are given then we will search for both files and directories
-        if (op_f && op_d)
-        {
-            if (d->d_type != DT_REG && d->d_type != DT_DIR)
-                continue;
-        }
+        // // if both op_f and op_d are given then we will search for both files and directories
+        // if (op_f && op_d)
+        // {
+        //     if (d->d_type != DT_REG && d->d_type != DT_DIR)
+        //         continue;
+        // }
 
         // if op_d is given then we will search for directories
         if (op_d)

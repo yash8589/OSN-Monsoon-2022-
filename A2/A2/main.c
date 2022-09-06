@@ -19,8 +19,6 @@
 // prompt() prints the prompt
 // get_input() takes input from the user
 
-// TODO: '&' operator run the command preceding it in the background after printing the process id of the newly created process.
-
 int main()
 {
     char *old_dir = init_shell();
@@ -144,7 +142,7 @@ int main()
             }
             // implement ls, ls -l, ls -a without using execvp
 
-            // TODO:  ls <filename>, color coding
+            // TODO:  ls <filename>
             else if (strcmp(sep_commands[j], "ls") == 0)
             {
                 // fprintf(history_file, "%s", argv[i]);
@@ -205,7 +203,7 @@ int main()
 
             // implement the pinfo command
 
-            // TODO: Process state regex to make it look how it is supposed to look, and +/- for foreground processes and background processes
+            // TODO: +/- for foreground processes and background processes
             else if (strcmp(sep_commands[j], "pinfo") == 0)
             {
                 char *lastchar = argv[i] + strlen(argv[i]) - 1;
@@ -246,27 +244,20 @@ int main()
                     {
                         flag_f = 1;
                     }
-                    else if (max_args > 2)
-                    {
-                        if ((strcmp(sep_commands[j + 1], "-d") == 0 || strcmp(sep_commands[j + 2], "-f") == 0))
-                        {
-                            flag_d = 0;
-                            flag_f = 0;
-                        }
-                        else if (strcmp(sep_commands[j + 1], "-f") == 0 || strcmp(sep_commands[j + 2], "-d") == 0)
-                        {
-                            flag_d = 0;
-                            flag_f = 0;
-                        }
-                    }
-
                     else
                     {
                         file_hierchy[file_hier] = sep_commands[j + 1];
                         file_hier++;
                     }
+
                     j++;
                 }
+                if (flag_d && flag_f)
+                {
+                    flag_d = 0;
+                    flag_f = 0;
+                }
+                // printf("%d   %d", flag_d, flag_f);
                 if (file_hier == 2)
                 {
                     dir_name = file_hierchy[0];
@@ -293,7 +284,6 @@ int main()
                 _history();
             }
             else
-            // TODO: full background process
             {
                 char *lastchar = input_copy + strlen(input_copy) - 2;
                 if (strcmp(lastchar, "&\n") == 0)
