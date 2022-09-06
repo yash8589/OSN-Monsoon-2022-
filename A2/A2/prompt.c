@@ -63,7 +63,16 @@ void prompt()
     hostname(name_host);
     // print the prompt
     if (strlen(w_dir) >= strlen(old_dir))
-        printf("%s@%s:~%s$ ", name_user, name_host, w_dir + strlen(old_dir));
+    // printf("%s@%s:~%s$ ", name_user, name_host, w_dir + strlen(old_dir));
+    {
+        printGreen();
+        printf("%s@%s:", name_user, name_host);
+        resetColor();
+        printBlue();
+        printf("~%s ", w_dir + strlen(old_dir));
+        resetColor();
+        
+    }
     else
         printf("%s@%s:~%s$ ", name_user, name_host, w_dir);
 }

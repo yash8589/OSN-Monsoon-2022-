@@ -16,9 +16,6 @@
 #include <grp.h>
 
 // ls commands with flags implemented without using execvp and execv
-
-// ls()
-
 // TODO: demoss
 
 void _ls(const char *dir, int op_a, int op_l)
@@ -69,12 +66,33 @@ void _ls(const char *dir, int op_a, int op_l)
             }
         }
     }
+
     // print list_dir
     if (!op_l)
     {
         for (int i = 0; i < num_dir; i++)
         {
-            printf("%s  ", list_dir[i]);
+            struct stat fileStat;
+            char *file_name = list_dir[i];
+            if (stat(file_name, &fileStat) < 0)
+            {
+                perror("Error: Unable to get file stats");
+                return;
+            }
+            if ((S_ISDIR(fileStat.st_mode)))
+            {
+                printBlue();
+                printf("%s  ", list_dir[i]);
+                resetColor();
+            }
+            else if ((fileStat.st_mode & S_IXUSR) || (fileStat.st_mode & S_IXGRP) || (fileStat.st_mode & S_IXOTH))
+            {
+                printGreen();
+                printf("%s  ", list_dir[i]);
+                resetColor();
+            }
+            else
+                printf("%s  ", list_dir[i]);
         }
     }
     else
@@ -116,14 +134,312 @@ void _ls(const char *dir, int op_a, int op_l)
             time[strlen(time) - 1] = '\0';
             printf("%s ", time);
             // print file name
-            printf("%s ", file_name);
+            if ((S_ISDIR(fileStat.st_mode)))
+            {
+                printBlue();
+                printf("%s  ", list_dir[i]);
+                resetColor();
+            }
+            else if ((fileStat.st_mode & S_IXUSR) || (fileStat.st_mode & S_IXGRP) || (fileStat.st_mode & S_IXOTH))
+            {
+                printGreen();
+                printf("%s  ", list_dir[i]);
+                resetColor();
+            }
+            else
+                printf("%s  ", list_dir[i]);
             printf("\n");
         }
-        printf("\n");
     }
     if (!op_l)
         printf("\n");
 
     // Close the directory
     closedir(dh);
+}
+
+// pinfo command
+
+void _pinfo(char *pid, char *old_dir)
+{
+    // if no pid is given then we will print info of current process
+    if (pid == NULL)
+    {
+        pid = (char *)malloc(100 * sizeof(char));
+        sprintf(pid, "%d", getpid());
+    }
+
+    // print pid
+
+    printf("pid : %s\n", pid);
+
+    // print process status
+
+    char *status_file = (char *)malloc(100 * sizeof(char));
+    sprintf(status_file, "/proc/%s/status", pid);
+    FILE *fp = fopen(status_file, "r");
+    if (fp == NULL)
+    {
+        perror("Error: Unable to open status file");
+        return;
+    }
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    // while ((read = getline(&line, &len, fp)) != -1)
+    // {
+    //     if (strstr(line, "State") != NULL)
+    //     {
+    //         printf("Process Status : %s", line);
+    //         break;
+    //     }
+    // }
+
+    // print the process status
+    char *stat_file = (char *)malloc(100 * sizeof(char));
+    sprintf(stat_file, "/proc/%s/stat", pid);
+    FILE *fp2 = fopen(stat_file, "r");
+    if (fp2 == NULL)
+    {
+        perror("Error: Unable to open stat file");
+        return;
+    }
+    char *line2 = NULL;
+    size_t len2 = 0;
+    ssize_t read2;
+    while ((read2 = getline(&line2, &len2, fp2)) != -1)
+    {
+        char *token = strtok(line2, " ");
+        int i = 0;
+        while (token != NULL)
+        {
+            if (i == 2)
+            {
+                printf("Process Status : %s \n", token);
+                break;
+            }
+            token = strtok(NULL, " ");
+            i++;
+        }
+    }
+
+    line2 = NULL;
+    len2 = 0;
+    char *pgid;
+
+    while ((read2 = getline(&line2, &len2, fp2)) != -1)
+    {
+        char *token = strtok(line2, " ");
+        int i = 0;
+        while (token != NULL)
+        {
+            if (i == 4)
+            {
+                strcpy(pgid, token);
+                break;
+            }
+            token = strtok(NULL, " ");
+            i++;
+        }
+    }
+    // // get console process id of the process with pid
+    // char *console_file = (char *)malloc(100 * sizeof(char));
+    // sprintf(console_file, "/proc/%s/stat", pgid);
+    // FILE *fp3 = fopen(console_file, "r");
+    // if (fp3 == NULL)
+    // {
+    //     perror("Error: Unable to open stat file");
+    //     return;
+    // }
+    // char *line3 = NULL;
+    // size_t len3 = 0;
+    // ssize_t read3;
+    // while ((read3 = getline(&line3, &len3, fp3)) != -1)
+    // {
+    //     char *token = strtok(line3, " ");
+    //     int i = 0;
+    //     while (token != NULL)
+    //     {
+    //         if (i == 6)
+    //         {
+    //             printf("Process Group ID : %s \n", token);
+    //             break;
+    //         }
+    //         token = strtok(NULL, " ");
+    //         i++;
+    //     }
+    // }
+
+    // compare the console pid with the process group id
+    // if they are same then the process is running in foreground
+    // else it is running in background
+
+    // pid_t console_pid = tcgetpgrp(STDOUT_FILENO);
+    // pid_t my_pid = getpgrp();
+    // if (console_pid == my_pid)
+    //     printf("process foregrounded\n");
+    // else
+    //     printf("process backgrounded\n");
+    fclose(fp2);
+
+    fclose(fp);
+    // print memory
+
+    char *mem_file = (char *)malloc(100 * sizeof(char));
+    sprintf(mem_file, "/proc/%s/statm", pid);
+    fp = fopen(mem_file, "r");
+    if (fp == NULL)
+    {
+        perror("Error: Unable to open statm file");
+        return;
+    }
+    line = NULL;
+    len = 0;
+    read = getline(&line, &len, fp);
+    char *memory = strtok(line, " ");
+    printf("memory : %s\n", memory);
+    fclose(fp);
+
+    // print executable path
+
+    char *exe_file = (char *)malloc(100 * sizeof(char));
+    sprintf(exe_file, "/proc/%s/exe", pid);
+    char *exe_path = (char *)malloc(100 * sizeof(char));
+    int len_exe = readlink(exe_file, exe_path, 100);
+    exe_path[len_exe] = '\0';
+    printf("Executable Path : ~%s\n", exe_path + strlen(old_dir));
+}
+
+// Create a custom discover command which emulates the basics of the find command. The command should search for files in a directory hierarchy.
+
+void _discover(char *dir, char *name, char *old_dir, int op_d, int op_f)
+{
+    // if no directory is given then we will search in current directory
+    if (dir == NULL)
+    {
+        dir = (char *)malloc(100 * sizeof(char));
+        getcwd(dir, 100);
+    }
+    // if no name is given then we will search for all files
+    if (name == NULL)
+    {
+        name = (char *)malloc(100 * sizeof(char));
+        strcpy(name, "");
+    }
+    // open the directory
+    DIR *dh = opendir(dir);
+    if (dh == NULL)
+    {
+        perror("Error: Unable to open directory");
+        return;
+    }
+    // read the directory
+    struct dirent *d;
+    // While the next entry is not readable we will print directory files
+    while ((d = readdir(dh)) != NULL)
+    {
+        // If hidden files are found we continue
+        if (d->d_name[0] == '.')
+            continue;
+        // if name is given then we will search for that name
+        if (strcmp(name, "") != 0)
+        {
+            if (strstr(d->d_name, name) == NULL)
+                continue;
+        }
+        // if both op_f and op_d are given then we will search for both files and directories
+        if (op_f && op_d)
+        {
+            if (d->d_type != DT_REG && d->d_type != DT_DIR)
+                continue;
+        }
+
+        // if op_d is given then we will search for directories
+        if (op_d)
+        {
+            if (d->d_type != DT_DIR)
+                continue;
+        }
+        // if op_f is given then we will search for files
+        if (op_f)
+        {
+            if (d->d_type != DT_REG)
+                continue;
+        }
+
+        // print the file name
+        printf("%s/%s \n", dir, d->d_name);
+    }
+    // close the directory
+    closedir(dh);
+    // open the directory again
+    dh = opendir(dir);
+    // While the next entry is not readable we will search for files in subdirectories
+    while ((d = readdir(dh)) != NULL)
+    {
+        // If hidden files are found we continue
+        if (d->d_name[0] == '.')
+            continue;
+        // if the entry is a directory then we will search for files in that directory
+        if (d->d_type == DT_DIR)
+        {
+            char *new_dir = (char *)malloc(100 * sizeof(char));
+            sprintf(new_dir, "%s/%s", dir, d->d_name);
+            _discover(new_dir, name, old_dir, op_d, op_f);
+        }
+    }
+    // close the directory
+    closedir(dh);
+}
+
+// Create a custom history command which emulates the basics of the history command. The command should print the last 10 commands executed by the shell.
+
+void _history()
+{
+    // open the history file
+    FILE *fp = fopen("/home/yash/college/third_year/OSN/OSN-Monsoon-2022-/A2/A2/history.txt", "r");
+    if (fp == NULL)
+    {
+        perror("Error: Unable to open history file");
+        return;
+    }
+    // read the history file
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    int count = 0;
+    // while ((read = getline(&line, &len, fp)) != -1)
+    // {
+    //     // print the last 10 commands
+    //     if (count >= 10)
+    //         break;
+    //     printf("%s", line);
+    //     count++;
+    // }
+
+    // print the last 10 lines of the file
+
+    int lines = 0;
+    while ((read = getline(&line, &len, fp)) != -1)
+    {
+        lines++;
+    }
+    fclose(fp);
+    fp = fopen("/home/yash/college/third_year/OSN/OSN-Monsoon-2022-/A2/A2/history.txt", "r");
+    count = 0;
+    // if the command is encountered twice consecutively then we will not print it
+    char *prev_line = (char *)malloc(100 * sizeof(char));
+    while ((read = getline(&line, &len, fp)) != -1)
+    {
+        if (count >= lines - 10)
+        {
+            if (strcmp(line, prev_line) != 0)
+            {
+                printf("%s", line);
+                strcpy(prev_line, line);
+            }
+        }
+        count++;
+    }
+    fclose(fp);
 }

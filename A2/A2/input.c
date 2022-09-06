@@ -18,3 +18,26 @@ char *get_input()
     // printf("%s", input);
     return input;
 }
+
+void printGreen()
+{
+    printf("%s", "\033[1m\033[32m");
+}
+
+void printBlue()
+{
+    printf("%s", "\033[1m\033[34m");
+}
+void printCyan()
+{
+    printf("%s", "\033[1m\033[36m");
+}
+void resetColor()
+{
+    printf("%s", "\033[1m\033[0m");
+}
+
+void printYellow()
+{
+    printf("%s", "\033[1m\033[33m");
+}
