@@ -1,0 +1,3 @@
+[submodule "A4/xv6-OSN-A4"]
+	path = A4/xv6-OSN-A4
+	url = git@github.com:yash8589/xv6-OSN-A4.git
