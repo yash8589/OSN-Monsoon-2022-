@@ -15,8 +15,6 @@
 #include <sys/wait.h>
 #include <pwd.h>
 #include <grp.h>
-#include <signal.h>
-#include <setjmp.h>
 
 // execute sys commands in foreground
 void _execute(char **args, char *old_dir)
@@ -25,10 +23,9 @@ void _execute(char **args, char *old_dir)
     int status;
     pid_t pid;
     pid = fork();
-
+    
     if (pid == 0)
     {
-        // signal(SIGINT, SIG_DFL);
         // child process
         if (execvp(args[0], args) < 0)
         {
@@ -49,10 +46,44 @@ void _execute(char **args, char *old_dir)
     }
 }
 
+// execute sys commands in background
+
+// int _background(char **args, char *old_dir)
+// {
+
+//     int status;
+//     pid_t pid;
+//     pid = fork();
+//     if (pid == 0)
+//     {
+//         // child process
+//         if (execvp(args[0], args) < 0)
+//         {
+//             perror("Error");
+//             exit(1);
+//         }
+//     }
+//     else if (pid < 0)
+//     {
+//         // error forking
+//         perror("Error");
+//         exit(1);
+//     }
+//     else
+//     {
+//         // parent process
+//         // waitpid(pid, &status, WUNTRACED);
+
+//         // print the pid of the newly created process
+//     }
+//     printf("PID: %d \n", pid);
+//     return pid;
+// }
+
 int _background(char *input, char *old_dir)
 {
     pid_t pid = fork();
-    char *input_copy;
+    char* input_copy;
     strcpy(input_copy, input);
     int num_cum = 0;
     if (pid == 0)
@@ -88,6 +119,6 @@ int _background(char *input, char *old_dir)
         perror("Error");
         exit(1);
     }
-
+    
     return pid;
 }

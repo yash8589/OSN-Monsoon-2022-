@@ -15,10 +15,6 @@ char *get_input()
     char *input = (char *)malloc(len * sizeof(char));
     int input_len;
     input_len = getline(&input, &len, stdin);
-    if (input_len == -1) {  /* Exit on Ctrl-D */
-            exit(0);
-            // exit(0);
-        }
     // printf("%s", input);
     return input;
 }

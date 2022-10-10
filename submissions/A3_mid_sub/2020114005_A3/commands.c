@@ -16,6 +16,7 @@
 #include <grp.h>
 
 // ls commands with flags implemented without using execvp and execv
+// TODO: demoss
 
 void _ls(const char *dir, int op_a, int op_l)
 {

@@ -13,25 +13,15 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <setjmp.h>
 
-static jmp_buf env;
-static volatile sig_atomic_t jump_active = 0;
+// TODO: Spec: 4 ,spec 6, spec 7, spec 8 (whole)
 
-void sigint_handler(int signo)
-{
-    if (!jump_active)
-    {
-        return;
-    }
-    siglongjmp(env, 42);
-}
+// init_shell() initializes the shell
+// prompt() prints the prompt
+// get_input() takes input from the user
 
 int main()
 {
-    // signal(SIGINT, SIG_IGN);
-    signal(SIGINT, sigint_handler);
-
     char *old_dir = init_shell();
     // printf("%s", old_dir);
     char current_dir[1024];
@@ -45,18 +35,9 @@ int main()
     int history_count = 0; // history count of 1 session
     int child_pid = 0;
     int status;
-    char name_child_process[1000][1000];
-    int number_background_processes = 0;
 
     while (1)
     {
-        if (sigsetjmp(env, 1) == 42)
-        {
-            printf("\n");
-        }
-        jump_active = 1;
-        // printf("next iteration...\n");
-        // sleep(2);
 
         int max_args = 0;
         long long argc = 0; // number of arguments
@@ -65,8 +46,6 @@ int main()
         char *input = get_input();
         char *input_copy = (char *)malloc(1000 * sizeof(char));
         strcpy(input_copy, input);
-
-
         // char *input_no_spaces = removeSpacesFromStr(input);
         // long long temp = parse(input_no_spaces, argc, argv);
         long long temp = parse(input, argc, argv);
@@ -77,7 +56,7 @@ int main()
         // {
         //     printf("%s\n", argv[i]);
         // }
-
+        char name_child_process[10000];
         for (int i = 0; i < argc; i++)
         {
             // fgets(buffer, sizeof(buffer), argv[i]);
@@ -202,6 +181,8 @@ int main()
             //     max_args_temp = input_command_index - 1;
             // }
 
+
+
             if (strcmp(sep_commands[j], "cd") == 0)
             {
                 // fprintf(history_file, "%s", argv[i]);
@@ -285,7 +266,9 @@ int main()
                     perror("Error: No file specified");
                 }
             }
+            // implement ls, ls -l, ls -a without using execvp
 
+            // TODO:  ls <filename>
             else if (strcmp(sep_commands[j], "ls") == 0)
             {
                 // fprintf(history_file, "%s", argv[i]);
@@ -346,6 +329,7 @@ int main()
 
             // implement the pinfo command
 
+            // TODO: +/- for foreground processes and background processes
             else if (strcmp(sep_commands[j], "pinfo") == 0)
             {
                 char *lastchar = argv[i] + strlen(argv[i]) - 1;
@@ -364,6 +348,7 @@ int main()
 
             // Create a custom discover command which emulates the basics of the find command. The command should search for files in a directory hierarchy.
 
+            // TODO: discover -d -f
 
             else if (strcmp(sep_commands[j], "discover") == 0)
             {
@@ -424,10 +409,6 @@ int main()
             {
                 _history();
             }
-            else if (strcmp(sep_commands[j], "exit") == 0)
-            {
-                exit(0);
-            }
             else
             {
                 char *lastchar = input_copy + strlen(input_copy) - 2;
@@ -445,8 +426,7 @@ int main()
                     char temp[10000];
                     strcpy(temp, input_copy);
                     char *token = strtok(temp, " &\n\t\r");
-                    strcpy(name_child_process[number_background_processes], token);
-                    number_background_processes++;
+                    strcpy(name_child_process, token);
                     child_pid = _background(input_copy, old_dir);
                     printCyan();
                     printf("PID: %d\n", child_pid);
@@ -480,19 +460,18 @@ int main()
         }
         else
         {
-
             if (waitpid(child_pid, &status, WNOHANG) > 0)
             {
                 if (WEXITSTATUS(status))
                 {
                     printCyan();
-                    printf("%s process with PID %d exited abnormally\n", name_child_process[number_background_processes], child_pid);
+                    printf("%s process with PID %d exited abnormally\n", name_child_process, child_pid);
                     resetColor();
                 }
                 else
                 {
                     printGreen();
-                    printf("%s process with PID %d exited normally\n", name_child_process[number_background_processes], child_pid);
+                    printf("%s process with PID %d exited normally\n", name_child_process, child_pid);
                     resetColor();
                 }
                 // printf("Process with pid %d exited\n", child_pid);
@@ -503,12 +482,5 @@ int main()
                 continue;
             }
         }
-
-        // on pressing ctrl + c interrupt any currently running foreground job, by sending it the SIGINT signal. This should have no effect on the shell if there is no foreground process running.
-
-        // implement the above ctrl + c process by using the SIGINT signal
-
-        // on pressing ctrl + z, push the foreground  job to backgroung and change its status to stopped. This should have no effect on the shell if there is no foreground process running.
-        // on pressing ctrl + d, exit the shell
     }
 }

@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/yash/college/third_year/OSN/OSN-Monsoon-2022-/A3/A3/final",
+            "binaryPath": "/home/yash/college/third_year/OSN/OSN-Monsoon-2022-/A3/A3/final/shell",
+            "binaryArgs": []
+        }
+    ]
+}
