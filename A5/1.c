@@ -74,7 +74,7 @@ void *current_situation(void *arguments)
     else
     {
         green();
-        printf("%d: Student %d waits\n", args->T, args->id);
+        printf("%d: Student %d starts washing\n", args->T, args->id);
         reset();
     }
 
@@ -83,37 +83,10 @@ void *current_situation(void *arguments)
 
     // signal
     yellow();
-    printf("%d: Student %d finishes\n", args->T, args->id);
+    printf("%d: Student %d leaves after washing\n", args->T, args->id);
     reset();
     sem_post(&curr_sem);
     return NULL;
-
-
-    // if (global_time - args->T > args->P)
-    // {
-    //     red();
-    //     printf("%d: Student %d leaves\n", global_time, args->id);
-    //     reset();
-    //     return NULL;
-    // }
-
-    // // wait
-    // sem_wait(&curr_sem);
-    // green();
-    // printf("%d: Student %d starts washing\n", args->T, args->id);
-    // reset();
-
-    // // critical section
-    // sleep(args->W);
-    // // global_time += args->W;
-
-    // // signal
-    // yellow();
-    // printf("%d: Student %d leaves after washing\n", global_time, args->id);
-    // reset();
-    // sem_post(&curr_sem);
-
-    // return NULL;
 }
 
 int main()
