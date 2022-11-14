@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <unistd.h>
+#include <time.h>
 
 #define MAX_WASHING_MACHINES 1000
 
@@ -9,6 +10,12 @@ sem_t curr_sem;
 sem_t washing_machines[MAX_WASHING_MACHINES];
 int total_time_wasted = 0;
 int global_time = 0;
+int without_wash = 0;
+
+// time at the start of the program
+time_t start_time;
+pthread_mutex_t not_wash;
+
 
 typedef struct
 {
@@ -48,24 +55,30 @@ void reset()
     printf("\033[0m");
 }
 
+// TODO: correct the time part
+
 // create a thread function
 void *current_situation(void *arguments)
 {
     time_args *args = (time_args *)arguments;
     white();
-    printf("%d: Student %d arrives\n", args->T, args->id);
+    printf("%d: Student %d arrives\n", (int)(time(NULL) - start_time), args->id);
     reset();
 
     // if student has to wait for more than P seconds, then student leaves using sem_timedwait
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     ts.tv_sec += args->P;
-
+    
     // wait
     if (sem_timedwait(&curr_sem, &ts) == -1)
     {
         red();
-        printf("%d: Student %d leaves\n", args->T, args->id);
+        printf("%d: Student %d leaves without washing\n", (int)(time(NULL) - start_time), args->id);
+        // add a mutex lock here
+        pthread_mutex_lock(&not_wash);
+        without_wash++;
+        pthread_mutex_unlock(&not_wash);
         reset();
         return NULL;
     }
@@ -74,7 +87,7 @@ void *current_situation(void *arguments)
     else
     {
         green();
-        printf("%d: Student %d starts washing\n", args->T, args->id);
+        printf("%d: Student %d starts washing\n", (int)(time(NULL) - start_time), args->id);
         reset();
     }
 
@@ -83,7 +96,7 @@ void *current_situation(void *arguments)
 
     // signal
     yellow();
-    printf("%d: Student %d leaves after washing\n", args->T, args->id);
+    printf("%d: Student %d leaves after washing\n", (int)(time(NULL) - start_time), args->id);
     reset();
     sem_post(&curr_sem);
     return NULL;
@@ -96,8 +109,12 @@ int main()
 
     // N --> numeber of students
     // M --> number of washing machines
+    pthread_mutex_init(&not_wash, NULL);
     int N, M;
     scanf("%d %d", &N, &M);
+
+    // start_time will have the start time of the program
+    start_time = time(NULL);
 
     // T --> Time of arrival of student
     // W --> Time taken to wash clothes
@@ -134,11 +151,11 @@ int main()
         }
     }
 
-    // print for debugging and testing
-    for (int i = 0; i < N; i++)
-    {
-        printf("(%d) --> %d %d %d\n", stu[i].id, stu[i].T, stu[i].W, stu[i].P);
-    }
+    // // print for debugging and testing
+    // for (int i = 0; i < N; i++)
+    // {
+    //     printf("(%d) --> %d %d %d\n", stu[i].id, stu[i].T, stu[i].W, stu[i].P);
+    // }
 
     // array of N threads
     pthread_t students[N];
@@ -161,6 +178,23 @@ int main()
         pthread_join(students[i], NULL);
     }
     sem_destroy(&curr_sem);
+
+    // print the number of people who left without washing
+    printf("%d\n", without_wash);
+    if (without_wash/N > 0.25)
+    {
+        printf("Yes\n");
+    }
+    else
+    {
+        printf("No\n");
+    }
+
+    // // print global time
+    // printf("%d\n", global_time);
+
+    // print total time wasted
+    printf("%d\n", total_time_wasted);
 
     return 0;
 }
